@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Compra">
+<title>Llista de la Compra</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --green: #2E7D32;
+    --green-light: #E8F5E9;
+    --green-mid: #A5D6A7;
+    --red: #C62828;
+    --gray-100: #f5f5f5;
+    --gray-200: #e8e8e8;
+    --gray-400: #aaaaaa;
+    --gray-600: #666666;
+    --gray-900: #1a1a1a;
+    --bg: #ffffff;
+    --bg-secondary: #f7f7f7;
+    --text: #1a1a1a;
+    --text-secondary: #666666;
+    --border: #e0e0e0;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111111; --bg-secondary: #1e1e1e; --text: #f0f0f0;
+      --text-secondary: #999999; --border: #333333; --gray-100: #2a2a2a; --gray-200: #333333;
+      --green-light: #1B3A1C;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--green); color: #fff; padding: 1rem 1rem 0; position: sticky; top: 0; z-index: 50; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.2); color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .icon-btn:active { background: rgba(255,255,255,0.35); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; padding-bottom: 0; }
+  .tab { flex: 1; padding: 8px 4px; font-size: 13px; font-weight: 500; border: none; border-radius: 8px 8px 0 0; cursor: pointer; text-align: center; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); font-family: inherit; }
+  .tab.on { background: var(--bg); color: var(--green); }
+
+  /* STATUS BAR */
+  .status-bar { display: flex; align-items: center; gap: 6px; padding: 8px 1rem; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border); background: var(--bg-secondary); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-400); flex-shrink: 0; }
+  .status-dot.ok { background: #4CAF50; }
+  .status-dot.loading { background: #FF9800; animation: pulse 1s infinite; }
+  .status-dot.error { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* SCREENS */
+  .screen { display: none; padding: 1rem; padding-bottom: 6rem; }
+  .screen.active { display: block; }
+
+  /* CATEGORIES FILTER */
+  .cats-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 1rem; scrollbar-width: none; }
+  .cats-row::-webkit-scrollbar { display: none; }
+  .cat-chip { flex-shrink: 0; padding: 5px 13px; font-size: 13px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .cat-chip.active { background: var(--green); color: #fff; border-color: var(--green); }
+
+  /* ARTICLES */
+  .section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin: 1rem 0 6px; }
+  .article-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 7px; background: var(--bg); cursor: pointer; transition: background 0.1s; }
+  .article-card:active { background: var(--bg-secondary); }
+  .article-card.agafat { opacity: 0.5; }
+  .article-card.agafat .article-nom { text-decoration: line-through; }
+  .check-circle { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .check-circle.checked { background: var(--green); border-color: var(--green); color: #fff; }
+  .article-info { flex: 1; min-width: 0; }
+  .article-nom { font-size: 15px; font-weight: 500; color: var(--text); }
+  .article-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .article-qty { font-size: 14px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+  .del-btn { width: 30px; height: 30px; border-radius: 50%; border: none; background: transparent; color: var(--gray-400); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .del-btn:active { background: var(--gray-100); color: var(--red); }
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-secondary); font-size: 14px; }
+  .empty i { font-size: 44px; display: block; margin-bottom: 10px; opacity: 0.3; }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 1rem; }
+  .progress-text { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); margin-bottom: 5px; }
+  .progress-bar { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.3s; }
+
+  /* HABITUALS */
+  .hab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hab-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg); transition: background 0.1s; }
+  .hab-card:active { background: var(--green-light); border-color: var(--green); }
+  .hab-card.a-llista { background: var(--green-light); border-color: var(--green); }
+  .hab-nom { font-size: 14px; color: var(--text); flex: 1; }
+  .hab-cat { font-size: 11px; color: var(--text-secondary); }
+
+  /* FAB */
+  .fab { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 40; }
+  .fab button { width: 54px; height: 54px; border-radius: 50%; background: var(--green); color: #fff; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(46,125,50,0.4); }
+
+  /* MODAL */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--bg); border-radius: 20px 20px 0 0; padding: 1.25rem; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.32,0.72,0,1); }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .modal-header h3 { font-size: 18px; font-weight: 600; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 500; }
+  .field input, .field select { width: 100%; padding: 10px 12px; font-size: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: inherit; -webkit-appearance: none; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 0.5rem; }
+  .btn { padding: 10px 16px; font-size: 15px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text); cursor: pointer; font-family: inherit; }
+  .btn-primary { background: var(--green); color: #fff; border-color: var(--green); font-weight: 600; }
+  .btn-danger { color: var(--red); border-color: var(--red); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  /* AJUSTOS */
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .setting-label { font-size: 15px; color: var(--text); }
+  .setting-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .token-input { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--text); font-family: monospace; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1><i class="ti ti-shopping-cart"></i> Llista de la Compra</h1>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="syncDropbox()" title="Sincronitzar"><i class="ti ti-refresh"></i></button>
+      <button class="icon-btn" onclick="clearAgafats()" title="Netejar agafats"><i class="ti ti-checks"></i></button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tab-llista" onclick="showScreen('llista')">Llista</button>
+    <button class="tab" id="tab-habituals" onclick="showScreen('habituals')">Habituals</button>
+    <button class="tab" id="tab-ajustos" onclick="showScreen('ajustos')">Ajustos</button>
+  </div>
+</div>
+
+<div class="status-bar">
+  <div class="status-dot" id="status-dot"></div>
+  <span id="status-text">Carregant...</span>
+</div>
+
+<!-- LLISTA -->
+<div id="screen-llista" class="screen active">
+  <div class="progress-wrap" id="progress-wrap"></div>
+  <div class="cats-row" id="cats-row"></div>
+  <div id="llista-container"></div>
+  <div class="fab"><button onclick="openAddModal()" aria-label="Afegir article"><i class="ti ti-plus"></i></button></div>
+</div>
+
+<!-- HABITUALS -->
+<div id="screen-habituals" class="screen">
+  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem">Prem un article per afegir-lo directament a la llista.</p>
+  <div class="cats-row" id="hab-cats-row"></div>
+  <div class="hab-grid" id="habituals-container"></div>
+  <div class="fab"><button onclick="openHabModal()" aria-label="Afegir habitual"><i class="ti ti-plus"></i></button></div>
+</div>
+
+<!-- AJUSTOS -->
+<div id="screen-ajustos" class="screen">
+  <div class="setting-row">
+    <div>
+      <div class="setting-label">Token de Dropbox</div>
+      <div class="setting-sub">Necessari per sincronitzar entre dispositius</div>
+    </div>
+  </div>
+  <textarea id="token-input" class="token-input" rows="3" placeholder="Enganxa aquí el token de Dropbox..." style="margin-top:8px;resize:none"></textarea>
+  <button class="btn btn-primary btn-sm" onclick="saveToken()" style="margin-top:8px;width:100%">Guardar token</button>
+
+  <div class="divider"></div>
+  <div class="setting-row">
+    <div>
+      <div class="setting-label">Categories</div>
+      <div class="setting-sub">Gestiona les categories de la llista</div>
+    </div>
+    <button class="btn btn-sm" onclick="openCatModal()">Editar</button>
+  </div>
+  <div id="cats-preview" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px"></div>
+
+  <div class="divider"></div>
+  <button class="btn btn-danger btn-sm" onclick="clearAll()" style="width:100%">Esborrar totes les dades locals</button>
+</div>
+
+<!-- MODAL ARTICLE -->
+<div class="overlay" id="modal-article" onclick="bgClick(event,'modal-article')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="art-modal-title">Nou article</h3>
+      <button class="btn btn-sm" onclick="closeModal('modal-article')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="field">
+      <label>Article</label>
+      <input id="art-nom" type="text" placeholder="p.ex. Llet, Pa, Tomàquets...">
+    </div>
+    <div class="field">
+      <label>Quantitat / notes</label>
+      <input id="art-qty" type="text" placeholder="p.ex. 2 litres, 1 bossa...">
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="art-cat"></select>
+    </div>
+    <div id="art-delete-row" style="display:none;margin-bottom:0.75rem">
+      <button class="btn btn-danger btn-sm" onclick="deleteArticle()" style="width:100%"><i class="ti ti-trash"></i> Eliminar article</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-article')" style="flex:1">Cancel·lar</button>
+      <button class="btn btn-primary" onclick="saveArticle()" style="flex:2">Afegir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HABITUAL -->
+<div class="overlay" id="modal-hab" onclick="bgClick(event,'modal-hab')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="hab-modal-title">Nou article habitual</h3>
+      <button class="btn btn-sm" onclick="closeModal('modal-hab')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="field">
+      <label>Article</label>
+      <input id="hab-nom" type="text" placeholder="p.ex. Llet, Pa, Tomàquets...">
+    </div>
+    <div class="field">
+      <label>Quantitat habitual</label>
+      <input id="hab-qty" type="text" placeholder="p.ex. 2 litres, 1 bossa...">
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="hab-cat"></select>
+    </div>
+    <div id="hab-delete-row" style="display:none;margin-bottom:0.75rem">
+      <button class="btn btn-danger btn-sm" onclick="deleteHabitual()" style="width:100%"><i class="ti ti-trash"></i> Eliminar habitual</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-hab')" style="flex:1">Cancel·lar</button>
+      <button class="btn btn-primary" onclick="saveHabitual()" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CATEGORIES -->
+<div class="overlay" id="modal-cats" onclick="bgClick(event,'modal-cats')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Categories</h3>
+      <button class="btn btn-sm" onclick="closeModal('modal-cats')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="cats-edit-list"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="new-cat-input" placeholder="Nova categoria..." style="flex:1;padding:8px 10px;font-size:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit">
+      <button class="btn btn-primary btn-sm" onclick="addCat()">+ Afegir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIGURACIÓ DROPBOX ───────────────────────────────────────────────────
+var DROPBOX_FILE = '/llista_compra.json';
+
+// ── ESTAT ──────────────────────────────────────────────────────────────────
+var token = '';
+var dades = { articles: [], habituals: [], cats: ['Fruita i verdura','Làctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'] };
+var filterCat = 'totes';
+var habFilterCat = 'totes';
+var editArtId = null;
+var editHabId = null;
+var syncing = false;
+
+(function init() {
+  try { token = localStorage.getItem('lc_token') || ''; } catch(e){}
+  try { var s = localStorage.getItem('lc_dades'); if(s) dades = JSON.parse(s); } catch(e){}
+  if (!dades.cats) dades.cats = ['Fruita i verdura','Làctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'];
+  if (!dades.habituals) dades.habituals = [];
+  renderAll();
+  if (token) syncDropbox();
+  else setStatus('warning', 'Sense token de Dropbox — dades locals');
+})();
+
+// ── DROPBOX SYNC ───────────────────────────────────────────────────────────
+function setStatus(state, msg) {
+  var dot = document.getElementById('status-dot');
+  var txt = document.getElementById('status-text');
+  dot.className = 'status-dot' + (state==='ok'?' ok':state==='loading'?' loading':state==='error'?' error':'');
+  txt.textContent = msg;
+}
+
+async function syncDropbox() {
+  if (!token) { setStatus('', 'Sense token — configura\'l a Ajustos'); return; }
+  if (syncing) return;
+  syncing = true;
+  setStatus('loading', 'Sincronitzant...');
+  try {
+    // Descarregar de Dropbox
+    var resp = await fetch('https://content.dropboxapi.com/2/files/download', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE })
+      }
+    });
+    if (resp.ok) {
+      var remote = await resp.json();
+      // Merge: afegim articles remots que no tenim localment
+      mergeData(remote);
+    } else if (resp.status === 409) {
+      // Fitxer no existeix — el creem
+      await uploadDropbox();
+    } else {
+      throw new Error('HTTP ' + resp.status);
+    }
+    await uploadDropbox();
+    var now = new Date();
+    setStatus('ok', 'Sincronitzat a les ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0'));
+  } catch(e) {
+    setStatus('error', 'Error de sincronització');
+    console.error(e);
+  }
+  syncing = false;
+}
+
+function mergeData(remote) {
+  // Articles: els del servidor tenen prioritat, afegim els locals nous
+  var remoteIds = (remote.articles||[]).map(function(a){return a.id;});
+  var localNous = dades.articles.filter(function(a){ return remoteIds.indexOf(a.id)<0; });
+  dades.articles = (remote.articles||[]).concat(localNous);
+  // Habituals: merge per id
+  var remoteHIds = (remote.habituals||[]).map(function(a){return a.id;});
+  var localHNous = dades.habituals.filter(function(a){ return remoteHIds.indexOf(a.id)<0; });
+  dades.habituals = (remote.habituals||[]).concat(localHNous);
+  // Categories
+  if (remote.cats && remote.cats.length) dades.cats = remote.cats;
+  saveLocal();
+  renderAll();
+}
+
+async function uploadDropbox() {
+  await fetch('https://content.dropboxapi.com/2/files/upload', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE, mode: 'overwrite', autorename: false }),
+      'Content-Type': 'application/octet-stream'
+    },
+    body: JSON.stringify(dades)
+  });
+}
+
+function saveLocal() {
+  try { localStorage.setItem('lc_dades', JSON.stringify(dades)); } catch(e){}
+}
+
+async function saveAndSync() {
+  saveLocal();
+  if (token) {
+    setStatus('loading', 'Guardant...');
+    try {
+      await uploadDropbox();
+      var now = new Date();
+      setStatus('ok', 'Guardat a les ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0'));
+    } catch(e) { setStatus('error', 'Error guardant a Dropbox'); }
+  }
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderLlista();
+  renderHabituals();
+  renderAjustos();
+}
+
+function renderLlista() {
+  // Progress
+  var total = dades.articles.length;
+  var agafats = dades.articles.filter(function(a){return a.agafat;}).length;
+  var pw = document.getElementById('progress-wrap');
+  if (total > 0) {
+    pw.innerHTML = '<div class="progress-text"><span>' + agafats + ' de ' + total + ' agafats</span><span>' + Math.round(agafats/total*100) + '%</span></div>'
+      + '<div class="progress-bar"><div class="progress-fill" style="width:' + Math.round(agafats/total*100) + '%"></div></div>';
+  } else { pw.innerHTML = ''; }
+
+  // Chips categoria
+  var cats = ['totes'].concat(dades.cats);
+  document.getElementById('cats-row').innerHTML = cats.map(function(c){
+    return '<button class="cat-chip' + (filterCat===c?' active':'') + '" onclick="setFilter(\'' + esc(c) + '\')">' + (c==='totes'?'Totes':c) + '</button>';
+  }).join('');
+
+  // Articles
+  var list = dades.articles.slice();
+  if (filterCat !== 'totes') list = list.filter(function(a){ return a.cat === filterCat; });
+
+  var pendents = list.filter(function(a){return !a.agafat;});
+  var agafatsList = list.filter(function(a){return a.agafat;});
+
+  var html = '';
+  if (!pendents.length && !agafatsList.length) {
+    html = '<div class="empty"><i class="ti ti-basket"></i>La llista és buida!<br><span style="font-size:12px;margin-top:6px;display:block">Prem + per afegir articles</span></div>';
+  }
+  if (pendents.length) {
+    html += pendents.map(function(a){ return artCard(a); }).join('');
+  }
+  if (agafatsList.length) {
+    html += '<div class="section-title">Ja agafats (' + agafatsList.length + ')</div>';
+    html += agafatsList.map(function(a){ return artCard(a); }).join('');
+  }
+  document.getElementById('llista-container').innerHTML = html;
+}
+
+function artCard(a) {
+  return '<div class="article-card' + (a.agafat?' agafat':'') + '" onclick="toggleAgafat(\'' + a.id + '\')">'
+    + '<div class="check-circle' + (a.agafat?' checked':'') + '">' + (a.agafat?'<i class="ti ti-check"></i>':'') + '</div>'
+    + '<div class="article-info"><div class="article-nom">' + esc(a.nom) + '</div>'
+    + (a.qty||a.cat?'<div class="article-meta">' + (a.cat||'') + (a.qty&&a.cat?' · ':'') + (a.qty||'') + '</div>':'')
+    + '</div>'
+    + '<button class="del-btn" onclick="event.stopPropagation();openEditArt(\'' + a.id + '\')"><i class="ti ti-pencil"></i></button>'
+    + '</div>';
+}
+
+function renderHabituals() {
+  var cats = ['totes'].concat(dades.cats);
+  document.getElementById('hab-cats-row').innerHTML = cats.map(function(c){
+    return '<button class="cat-chip' + (habFilterCat===c?' active':'') + '" onclick="setHabFilter(\'' + esc(c) + '\')">' + (c==='totes'?'Totes':c) + '</button>';
+  }).join('');
+
+  var list = dades.habituals.slice();
+  if (habFilterCat !== 'totes') list = list.filter(function(h){ return h.cat === habFilterCat; });
+  list.sort(function(a,b){ return a.nom.localeCompare(b.nom); });
+
+  var llista_ids = dades.articles.map(function(a){return a.nom.toLowerCase();});
+  document.getElementById('habituals-container').innerHTML = list.length ? list.map(function(h){
+    var aLlista = llista_ids.indexOf(h.nom.toLowerCase()) > -1;
+    return '<div class="hab-card' + (aLlista?' a-llista':'') + '" onclick="addHabToLlista(\'' + h.id + '\')">'
+      + '<div style="flex:1"><div class="hab-nom">' + esc(h.nom) + '</div><div class="hab-cat">' + esc(h.cat||'') + (h.qty?' · '+esc(h.qty):'') + '</div></div>'
+      + '<button onclick="event.stopPropagation();openEditHab(\'' + h.id + '\')" style="border:none;background:transparent;color:var(--gray-400);cursor:pointer;font-size:16px"><i class="ti ti-pencil"></i></button>'
+      + '</div>';
+  }).join('')
+  : '<div class="empty" style="grid-column:1/-1"><i class="ti ti-star"></i>Cap article habitual<br><span style="font-size:12px">Afegeix els que compres sovint</span></div>';
+}
+
+function renderAjustos() {
+  var t = document.getElementById('token-input');
+  if (t) t.value = token;
+  document.getElementById('cats-preview').innerHTML = dades.cats.map(function(c){
+    return '<span style="padding:3px 10px;font-size:12px;border:1px solid var(--border);border-radius:20px;color:var(--text-secondary)">' + esc(c) + '</span>';
+  }).join('');
+}
+
+function renderCatsEdit() {
+  document.getElementById('cats-edit-list').innerHTML = dades.cats.map(function(c,i){
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      + '<input value="' + esc(c) + '" onchange="dades.cats[' + i + ']=this.value;saveLocal()" style="flex:1;padding:7px 10px;font-size:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit">'
+      + '<button class="btn btn-danger btn-sm" onclick="deleteCat(' + i + ')"><i class="ti ti-trash"></i></button>'
+      + '</div>';
+  }).join('');
+}
+
+// ── ACCIONS ARTICLES ───────────────────────────────────────────────────────
+function toggleAgafat(id) {
+  var a = dades.articles.find(function(x){return x.id===id;});
+  if (a) { a.agafat = !a.agafat; saveAndSync(); renderLlista(); }
+}
+
+function openAddModal() {
+  editArtId = null;
+  document.getElementById('art-modal-title').textContent = 'Nou article';
+  document.getElementById('art-nom').value = '';
+  document.getElementById('art-qty').value = '';
+  document.getElementById('art-cat').innerHTML = dades.cats.map(function(c){return '<option>'+c+'</option>';}).join('');
+  document.getElementById('art-delete-row').style.display = 'none';
+  openOverlay('modal-article');
+  setTimeout(function(){ document.getElementById('art-nom').focus(); }, 300);
+}
+
+function openEditArt(id) {
+  var a = dades.articles.find(function(x){return x.id===id;});
+  if (!a) return;
+  editArtId = id;
+  document.getElementById('art-modal-title').textContent = 'Editar article';
+  document.getElementById('art-nom').value = a.nom;
+  document.getElementById('art-qty').value = a.qty || '';
+  document.getElementById('art-cat').innerHTML = dades.cats.map(function(c){return '<option'+(c===a.cat?' selected':'')+'>'+c+'</option>';}).join('');
+  document.getElementById('art-delete-row').style.display = 'block';
+  openOverlay('modal-article');
+}
+
+function saveArticle() {
+  var nom = document.getElementById('art-nom').value.trim();
+  if (!nom) { alert('Escriu el nom de l\'article.'); return; }
+  var entry = { id: editArtId||String(Date.now()), nom: nom, qty: document.getElementById('art-qty').value.trim(), cat: document.getElementById('art-cat').value, agafat: false };
+  if (editArtId) {
+    var i = dades.articles.findIndex(function(x){return x.id===editArtId;});
+    if (i>-1) { entry.agafat = dades.articles[i].agafat; dades.articles[i]=entry; }
+  } else {
+    dades.articles.push(entry);
+  }
+  saveAndSync(); closeModal('modal-article'); renderLlista();
+}
+
+function deleteArticle() {
+  if (!editArtId || !confirm('Eliminar aquest article?')) return;
+  dades.articles = dades.articles.filter(function(x){return x.id!==editArtId;});
+  saveAndSync(); closeModal('modal-article'); renderLlista();
+}
+
+function clearAgafats() {
+  if (!dades.articles.some(function(a){return a.agafat;})) { alert('No hi ha articles marcats com a agafats.'); return; }
+  if (confirm('Eliminar tots els articles ja agafats?')) {
+    dades.articles = dades.articles.filter(function(a){return !a.agafat;});
+    saveAndSync(); renderLlista();
+  }
+}
+
+// ── HABITUALS ──────────────────────────────────────────────────────────────
+function addHabToLlista(id) {
+  var h = dades.habituals.find(function(x){return x.id===id;});
+  if (!h) return;
+  var jaExisteix = dades.articles.some(function(a){return a.nom.toLowerCase()===h.nom.toLowerCase()&&!a.agafat;});
+  if (jaExisteix) { alert('"' + h.nom + '" ja és a la llista!'); return; }
+  dades.articles.push({ id: String(Date.now()), nom: h.nom, qty: h.qty||'', cat: h.cat, agafat: false });
+  saveAndSync(); renderHabituals(); renderLlista();
+}
+
+function openHabModal() {
+  editHabId = null;
+  document.getElementById('hab-modal-title').textContent = 'Nou article habitual';
+  document.getElementById('hab-nom').value = '';
+  document.getElementById('hab-qty').value = '';
+  document.getElementById('hab-cat').innerHTML = dades.cats.map(function(c){return '<option>'+c+'</option>';}).join('');
+  document.getElementById('hab-delete-row').style.display = 'none';
+  openOverlay('modal-hab');
+  setTimeout(function(){ document.getElementById('hab-nom').focus(); }, 300);
+}
+
+function openEditHab(id) {
+  var h = dades.habituals.find(function(x){return x.id===id;});
+  if (!h) return;
+  editHabId = id;
+  document.getElementById('hab-modal-title').textContent = 'Editar habitual';
+  document.getElementById('hab-nom').value = h.nom;
+  document.getElementById('hab-qty').value = h.qty || '';
+  document.getElementById('hab-cat').innerHTML = dades.cats.map(function(c){return '<option'+(c===h.cat?' selected':'')+'>'+c+'</option>';}).join('');
+  document.getElementById('hab-delete-row').style.display = 'block';
+  openOverlay('modal-hab');
+}
+
+function saveHabitual() {
+  var nom = document.getElementById('hab-nom').value.trim();
+  if (!nom) { alert('Escriu el nom de l\'article.'); return; }
+  var entry = { id: editHabId||String(Date.now()), nom: nom, qty: document.getElementById('hab-qty').value.trim(), cat: document.getElementById('hab-cat').value };
+  if (editHabId) {
+    var i = dades.habituals.findIndex(function(x){return x.id===editHabId;});
+    if (i>-1) dades.habituals[i]=entry;
+  } else { dades.habituals.push(entry); }
+  saveAndSync(); closeModal('modal-hab'); renderHabituals();
+}
+
+function deleteHabitual() {
+  if (!editHabId || !confirm('Eliminar aquest habitual?')) return;
+  dades.habituals = dades.habituals.filter(function(x){return x.id!==editHabId;});
+  saveAndSync(); closeModal('modal-hab'); renderHabituals();
+}
+
+// ── CATEGORIES ─────────────────────────────────────────────────────────────
+function openCatModal() { renderCatsEdit(); openOverlay('modal-cats'); }
+function addCat() {
+  var v = document.getElementById('new-cat-input').value.trim();
+  if (!v || dades.cats.indexOf(v)>-1) return;
+  dades.cats.push(v); saveLocal();
+  document.getElementById('new-cat-input').value = '';
+  renderCatsEdit(); renderAjustos();
+}
+function deleteCat(i) {
+  if (dades.articles.some(function(a){return a.cat===dades.cats[i];}) ||
+      dades.habituals.some(function(h){return h.cat===dades.cats[i];})) {
+    alert('Hi ha articles amb aquesta categoria.'); return;
+  }
+  dades.cats.splice(i,1); saveLocal(); renderCatsEdit(); renderAjustos();
+}
+
+// ── TOKEN ──────────────────────────────────────────────────────────────────
+function saveToken() {
+  token = document.getElementById('token-input').value.trim();
+  try { localStorage.setItem('lc_token', token); } catch(e){}
+  if (token) { alert('Token guardat! Sincronitzant...'); syncDropbox(); }
+  else setStatus('', 'Sense token — dades locals');
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function setFilter(f) { filterCat=f; renderLlista(); }
+function setHabFilter(f) { habFilterCat=f; renderHabituals(); }
+
+function showScreen(name) {
+  ['llista','habituals','ajustos'].forEach(function(n){
+    document.getElementById('screen-'+n).classList.toggle('active', n===name);
+    document.getElementById('tab-'+n).classList.toggle('on', n===name);
+  });
+  if (name==='llista') renderLlista();
+  if (name==='habituals') renderHabituals();
+  if (name==='ajustos') renderAjustos();
+}
+
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function bgClick(e, id) { if (e.target===document.getElementById(id)) closeModal(id); }
+
+function clearAll() {
+  if (confirm('Esborrar totes les dades locals? (Dropbox no es veurà afectat)')) {
+    dades = { articles:[], habituals:[], cats: dades.cats };
+    saveLocal(); renderAll();
+  }
+}
+
+// Sincronitzar cada 30 segons si la pàgina és visible
+setInterval(function(){ if (!document.hidden && token) syncDropbox(); }, 30000);
+document.addEventListener('visibilitychange', function(){ if (!document.hidden && token) syncDropbox(); });
+</script>
+</body>
+</html>
