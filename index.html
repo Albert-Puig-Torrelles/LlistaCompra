@@ -169,14 +169,30 @@
 
 <!-- AJUSTOS -->
 <div id="screen-ajustos" class="screen">
-  <div class="setting-row">
-    <div>
-      <div class="setting-label">Token de Dropbox</div>
-      <div class="setting-sub">Necessari per sincronitzar entre dispositius</div>
-    </div>
+  <div class="topbar"><h2>Ajustos</h2></div>
+
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:1rem">
+    <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:12px">&#x2699;&#xFE0F; ConfiguraciÃ³ Dropbox</div>
+
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">App Key</div>
+    <input id="client-id-input" type="text" placeholder="p.ex. 91itv1xw8my00b1"
+      style="width:100%;padding:8px 10px;font-size:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:monospace;margin-bottom:10px">
+
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">App Secret</div>
+    <input id="client-secret-input" type="password" placeholder="p.ex. hlna7vcpgmz23kx"
+      style="width:100%;padding:8px 10px;font-size:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:monospace;margin-bottom:10px">
+
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">Refresh Token</div>
+    <textarea id="token-input" rows="2" placeholder="Enganxa aquÃ­ el Refresh Token (comenÃ§a per rfW...)"
+      style="width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:monospace;resize:none;margin-bottom:10px"></textarea>
+
+    <button class="btn btn-primary btn-sm" onclick="saveToken()" style="width:100%">&#x1F4BE; Guardar configuraciÃ³</button>
+    <div id="config-status" style="font-size:12px;margin-top:8px;text-align:center"></div>
   </div>
-  <textarea id="token-input" class="token-input" rows="3" placeholder="Enganxa aquÃ­ el Refresh Token de Dropbox..." style="margin-top:8px;resize:none"></textarea>
-  <button class="btn btn-primary btn-sm" onclick="saveToken()" style="margin-top:8px;width:100%">Guardar token</button>
+
+  <div style="font-size:11px;color:var(--text-secondary);background:var(--bg-secondary);border-radius:var(--radius);padding:10px 12px;margin-bottom:1rem;line-height:1.6">
+    &#x2139;&#xFE0F; Per obtenir l'App Key, App Secret i Refresh Token, segueix la <b>Guia de configuraciÃ³ Dropbox</b>.
+  </div>
 
   <div class="divider"></div>
   <div class="setting-row">
