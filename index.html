@@ -268,12 +268,12 @@
 <script>
 // â”€â”€ CONFIGURACIÃ“ DROPBOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var DROPBOX_FILE = '/llista_compra.json';
-var DROPBOX_CLIENT_ID = '91itv1xw8my00b1';
-var DROPBOX_CLIENT_SECRET = 'hlna7vcpgmz23kx';
 
 // â”€â”€ ESTAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var token = '';
 var refreshToken = '';
+var clientId = '';
+var clientSecret = '';
 var dades = { articles: [], habituals: [], cats: ['Fruita i verdura','LÃ ctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'] };
 var filterCat = 'totes';
 var habFilterCat = 'totes';
@@ -284,6 +284,8 @@ var syncing = false;
 (function init() {
   try { token = localStorage.getItem('lc_token') || ''; } catch(e){}
   try { refreshToken = localStorage.getItem('lc_refresh_token') || ''; } catch(e){}
+  try { clientId = localStorage.getItem('lc_client_id') || ''; } catch(e){}
+  try { clientSecret = localStorage.getItem('lc_client_secret') || ''; } catch(e){}
   try { var s = localStorage.getItem('lc_dades'); if(s) dades = JSON.parse(s); } catch(e){}
   if (!dades.cats) dades.cats = ['Fruita i verdura','LÃ ctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'];
   if (!dades.habituals) dades.habituals = [];
@@ -301,12 +303,12 @@ function setStatus(state, msg) {
 }
 
 async function refreshAccessToken() {
-  if (!refreshToken) return false;
+  if (!refreshToken || !clientId || !clientSecret) return false;
   try {
     var body = 'grant_type=refresh_token'
       + '&refresh_token=' + encodeURIComponent(refreshToken)
-      + '&client_id=' + encodeURIComponent(DROPBOX_CLIENT_ID)
-      + '&client_secret=' + encodeURIComponent(DROPBOX_CLIENT_SECRET);
+      + '&client_id=' + encodeURIComponent(clientId)
+      + '&client_secret=' + encodeURIComponent(clientSecret);
     var resp = await fetch('https://api.dropbox.com/oauth2/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -324,6 +326,7 @@ async function refreshAccessToken() {
 
 async function syncDropbox() {
   if (!token && !refreshToken) { setStatus('', 'Sense token â€” configura\'l a Ajustos'); return; }
+  if (!clientId || !clientSecret) { setStatus('error', 'Falta App Key o App Secret â€” configura\'ls a Ajustos'); return; }
   if (syncing) return;
   syncing = true;
   setStatus('loading', 'Sincronitzant...');
@@ -505,7 +508,24 @@ function renderHabituals() {
 
 function renderAjustos() {
   var t = document.getElementById('token-input');
-  if (t) t.value = token;
+  if (t) t.value = refreshToken || token;
+  var ci = document.getElementById('client-id-input');
+  if (ci) ci.value = clientId;
+  var cs = document.getElementById('client-secret-input');
+  if (cs) cs.value = clientSecret;
+  // Mostrar estat de configuraciÃ³
+  var st = document.getElementById('config-status');
+  if (st) {
+    if (clientId && clientSecret && refreshToken) {
+      st.innerHTML = '<span style="color:var(--green)">&#x2705; ConfiguraciÃ³ completa</span>';
+    } else {
+      var missing = [];
+      if (!clientId) missing.push('App Key');
+      if (!clientSecret) missing.push('App Secret');
+      if (!refreshToken) missing.push('Refresh Token');
+      st.innerHTML = '<span style="color:#cc0000">&#x26A0;&#xFE0F; Falta: ' + missing.join(', ') + '</span>';
+    }
+  }
   document.getElementById('cats-preview').innerHTML = dades.cats.map(function(c){
     return '<span style="padding:3px 10px;font-size:12px;border:1px solid var(--border);border-radius:20px;color:var(--text-secondary)">' + esc(c) + '</span>';
   }).join('');
@@ -645,24 +665,30 @@ function deleteCat(i) {
 
 // â”€â”€ TOKEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function saveToken() {
-  var input = document.getElementById('token-input').value.trim();
-  // Accepta tant un access token com un refresh token
-  if (input.startsWith('rfW') || input.startsWith('rf')) {
-    refreshToken = input;
-    token = '';
-    try { localStorage.setItem('lc_refresh_token', refreshToken); localStorage.removeItem('lc_token'); } catch(e){}
-    alert('Refresh Token guardat! La sincronitzaciÃ³ ja no caducarÃ  mai. Sincronitzant...');
-    syncDropbox();
-  } else if (input) {
-    token = input;
-    try { localStorage.setItem('lc_token', token); } catch(e){}
-    alert('Token guardat! Sincronitzant...');
-    syncDropbox();
-  } else {
-    token = ''; refreshToken = '';
-    try { localStorage.removeItem('lc_token'); localStorage.removeItem('lc_refresh_token'); } catch(e){}
-    setStatus('', 'Sense token â€” dades locals');
+  var newClientId = document.getElementById('client-id-input').value.trim();
+  var newClientSecret = document.getElementById('client-secret-input').value.trim();
+  var newToken = document.getElementById('token-input').value.trim();
+
+  if (!newClientId || !newClientSecret || !newToken) {
+    alert('Cal omplir els tres camps: App Key, App Secret i Refresh Token.');
+    return;
   }
+
+  clientId = newClientId;
+  clientSecret = newClientSecret;
+  refreshToken = newToken;
+  token = '';
+
+  try {
+    localStorage.setItem('lc_client_id', clientId);
+    localStorage.setItem('lc_client_secret', clientSecret);
+    localStorage.setItem('lc_refresh_token', refreshToken);
+    localStorage.removeItem('lc_token');
+  } catch(e){}
+
+  renderAjustos();
+  alert('ConfiguraciÃ³ guardada! Sincronitzant...');
+  syncDropbox();
 }
 
 // â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
