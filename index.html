@@ -175,7 +175,7 @@
       <div class="setting-sub">Necessari per sincronitzar entre dispositius</div>
     </div>
   </div>
-  <textarea id="token-input" class="token-input" rows="3" placeholder="Enganxa aquÃ­ el token de Dropbox..." style="margin-top:8px;resize:none"></textarea>
+  <textarea id="token-input" class="token-input" rows="3" placeholder="Enganxa aquÃ­ el Refresh Token de Dropbox..." style="margin-top:8px;resize:none"></textarea>
   <button class="btn btn-primary btn-sm" onclick="saveToken()" style="margin-top:8px;width:100%">Guardar token</button>
 
   <div class="divider"></div>
@@ -268,9 +268,12 @@
 <script>
 // â”€â”€ CONFIGURACIÃ“ DROPBOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var DROPBOX_FILE = '/llista_compra.json';
+var DROPBOX_CLIENT_ID = '91itv1xw8my00b1';
+var DROPBOX_CLIENT_SECRET = 'hlna7vcpgmz23kx';
 
 // â”€â”€ ESTAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var token = '';
+var refreshToken = '';
 var dades = { articles: [], habituals: [], cats: ['Fruita i verdura','LÃ ctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'] };
 var filterCat = 'totes';
 var habFilterCat = 'totes';
@@ -280,6 +283,7 @@ var syncing = false;
 
 (function init() {
   try { token = localStorage.getItem('lc_token') || ''; } catch(e){}
+  try { refreshToken = localStorage.getItem('lc_refresh_token') || ''; } catch(e){}
   try { var s = localStorage.getItem('lc_dades'); if(s) dades = JSON.parse(s); } catch(e){}
   if (!dades.cats) dades.cats = ['Fruita i verdura','LÃ ctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'];
   if (!dades.habituals) dades.habituals = [];
@@ -296,12 +300,38 @@ function setStatus(state, msg) {
   txt.textContent = msg;
 }
 
+async function refreshAccessToken() {
+  if (!refreshToken) return false;
+  try {
+    var body = 'grant_type=refresh_token'
+      + '&refresh_token=' + encodeURIComponent(refreshToken)
+      + '&client_id=' + encodeURIComponent(DROPBOX_CLIENT_ID)
+      + '&client_secret=' + encodeURIComponent(DROPBOX_CLIENT_SECRET);
+    var resp = await fetch('https://api.dropbox.com/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    });
+    if (resp.ok) {
+      var data = await resp.json();
+      token = data.access_token;
+      try { localStorage.setItem('lc_token', token); } catch(e){}
+      return true;
+    }
+  } catch(e) { console.error('Error renovant token:', e); }
+  return false;
+}
+
 async function syncDropbox() {
-  if (!token) { setStatus('', 'Sense token â€” configura\'l a Ajustos'); return; }
+  if (!token && !refreshToken) { setStatus('', 'Sense token â€” configura\'l a Ajustos'); return; }
   if (syncing) return;
   syncing = true;
   setStatus('loading', 'Sincronitzant...');
   try {
+    // Si no hi ha token d'accÃ©s, renovar primer
+    if (!token && refreshToken) {
+      await refreshAccessToken();
+    }
     // Descarregar de Dropbox
     var resp = await fetch('https://content.dropboxapi.com/2/files/download', {
       method: 'POST',
@@ -310,12 +340,23 @@ async function syncDropbox() {
         'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE })
       }
     });
+    // Si el token ha caducat, renovar i tornar a intentar
+    if (resp.status === 401) {
+      var renewed = await refreshAccessToken();
+      if (renewed) {
+        resp = await fetch('https://content.dropboxapi.com/2/files/download', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE })
+          }
+        });
+      }
+    }
     if (resp.ok) {
       var remote = await resp.json();
-      // Merge: afegim articles remots que no tenim localment
       mergeData(remote);
     } else if (resp.status === 409) {
-      // Fitxer no existeix â€” el creem
       await uploadDropbox();
     } else {
       throw new Error('HTTP ' + resp.status);
@@ -346,7 +387,7 @@ function mergeData(remote) {
 }
 
 async function uploadDropbox() {
-  await fetch('https://content.dropboxapi.com/2/files/upload', {
+  var resp = await fetch('https://content.dropboxapi.com/2/files/upload', {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + token,
@@ -355,6 +396,20 @@ async function uploadDropbox() {
     },
     body: JSON.stringify(dades)
   });
+  if (resp.status === 401) {
+    var renewed = await refreshAccessToken();
+    if (renewed) {
+      await fetch('https://content.dropboxapi.com/2/files/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE, mode: 'overwrite', autorename: false }),
+          'Content-Type': 'application/octet-stream'
+        },
+        body: JSON.stringify(dades)
+      });
+    }
+  }
 }
 
 function saveLocal() {
@@ -590,10 +645,24 @@ function deleteCat(i) {
 
 // â”€â”€ TOKEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function saveToken() {
-  token = document.getElementById('token-input').value.trim();
-  try { localStorage.setItem('lc_token', token); } catch(e){}
-  if (token) { alert('Token guardat! Sincronitzant...'); syncDropbox(); }
-  else setStatus('', 'Sense token â€” dades locals');
+  var input = document.getElementById('token-input').value.trim();
+  // Accepta tant un access token com un refresh token
+  if (input.startsWith('rfW') || input.startsWith('rf')) {
+    refreshToken = input;
+    token = '';
+    try { localStorage.setItem('lc_refresh_token', refreshToken); localStorage.removeItem('lc_token'); } catch(e){}
+    alert('Refresh Token guardat! La sincronitzaciÃ³ ja no caducarÃ  mai. Sincronitzant...');
+    syncDropbox();
+  } else if (input) {
+    token = input;
+    try { localStorage.setItem('lc_token', token); } catch(e){}
+    alert('Token guardat! Sincronitzant...');
+    syncDropbox();
+  } else {
+    token = ''; refreshToken = '';
+    try { localStorage.removeItem('lc_token'); localStorage.removeItem('lc_refresh_token'); } catch(e){}
+    setStatus('', 'Sense token â€” dades locals');
+  }
 }
 
 // â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
