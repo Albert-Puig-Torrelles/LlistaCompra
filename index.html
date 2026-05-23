@@ -172,7 +172,7 @@
   <div class="topbar"><h2>Ajustos</h2></div>
 
   <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:1rem">
-    <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:12px">&#x2699;&#xFE0F; ConfiguraciÃ³ Dropbox</div>
+    <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:12px">&#x2699;&#xFE0F; Configuració Dropbox</div>
 
     <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">App Key</div>
     <input id="client-id-input" type="text" placeholder="p.ex. 91itv1xw8my00b1"
@@ -183,15 +183,15 @@
       style="width:100%;padding:8px 10px;font-size:14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:monospace;margin-bottom:10px">
 
     <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;font-weight:500">Refresh Token</div>
-    <textarea id="token-input" rows="2" placeholder="Enganxa aquÃ­ el Refresh Token (comenÃ§a per rfW...)"
+    <textarea id="token-input" rows="2" placeholder="Enganxa aquí el Refresh Token (comença per rfW...)"
       style="width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:monospace;resize:none;margin-bottom:10px"></textarea>
 
-    <button class="btn btn-primary btn-sm" onclick="saveToken()" style="width:100%">&#x1F4BE; Guardar configuraciÃ³</button>
+    <button class="btn btn-primary btn-sm" onclick="saveToken()" style="width:100%">&#x1F4BE; Guardar configuració</button>
     <div id="config-status" style="font-size:12px;margin-top:8px;text-align:center"></div>
   </div>
 
   <div style="font-size:11px;color:var(--text-secondary);background:var(--bg-secondary);border-radius:var(--radius);padding:10px 12px;margin-bottom:1rem;line-height:1.6">
-    &#x2139;&#xFE0F; Per obtenir l'App Key, App Secret i Refresh Token, segueix la <b>Guia de configuraciÃ³ Dropbox</b>.
+    &#x2139;&#xFE0F; Per obtenir l'App Key, App Secret i Refresh Token, segueix la <b>Guia de configuració Dropbox</b>.
   </div>
 
   <div class="divider"></div>
@@ -217,7 +217,7 @@
     </div>
     <div class="field">
       <label>Article</label>
-      <input id="art-nom" type="text" placeholder="p.ex. Llet, Pa, TomÃ quets...">
+      <input id="art-nom" type="text" placeholder="p.ex. Llet, Pa, Tomàquets...">
     </div>
     <div class="field">
       <label>Quantitat / notes</label>
@@ -231,7 +231,7 @@
       <button class="btn btn-danger btn-sm" onclick="deleteArticle()" style="width:100%"><i class="ti ti-trash"></i> Eliminar article</button>
     </div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-article')" style="flex:1">CancelÂ·lar</button>
+      <button class="btn" onclick="closeModal('modal-article')" style="flex:1">Cancel·lar</button>
       <button class="btn btn-primary" onclick="saveArticle()" style="flex:2">Afegir</button>
     </div>
   </div>
@@ -246,7 +246,7 @@
     </div>
     <div class="field">
       <label>Article</label>
-      <input id="hab-nom" type="text" placeholder="p.ex. Llet, Pa, TomÃ quets...">
+      <input id="hab-nom" type="text" placeholder="p.ex. Llet, Pa, Tomàquets...">
     </div>
     <div class="field">
       <label>Quantitat habitual</label>
@@ -260,7 +260,7 @@
       <button class="btn btn-danger btn-sm" onclick="deleteHabitual()" style="width:100%"><i class="ti ti-trash"></i> Eliminar habitual</button>
     </div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeModal('modal-hab')" style="flex:1">CancelÂ·lar</button>
+      <button class="btn" onclick="closeModal('modal-hab')" style="flex:1">Cancel·lar</button>
       <button class="btn btn-primary" onclick="saveHabitual()" style="flex:2">Guardar</button>
     </div>
   </div>
@@ -282,15 +282,16 @@
 </div>
 
 <script>
-// â”€â”€ CONFIGURACIÃ“ DROPBOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── CONFIGURACIÓ DROPBOX ───────────────────────────────────────────────────
 var DROPBOX_FILE = '/llista_compra.json';
 
-// â”€â”€ ESTAT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ESTAT ──────────────────────────────────────────────────────────────────
 var token = '';
 var refreshToken = '';
 var clientId = '';
 var clientSecret = '';
-var dades = { articles: [], habituals: [], cats: ['Fruita i verdura','LÃ ctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'] };
+var deletedIds = [];  // IDs d'articles esborrats per evitar que tornin
+var dades = { articles: [], habituals: [], cats: ['Fruita i verdura','Làctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'] };
 var filterCat = 'totes';
 var habFilterCat = 'totes';
 var editArtId = null;
@@ -302,15 +303,16 @@ var syncing = false;
   try { refreshToken = localStorage.getItem('lc_refresh_token') || ''; } catch(e){}
   try { clientId = localStorage.getItem('lc_client_id') || ''; } catch(e){}
   try { clientSecret = localStorage.getItem('lc_client_secret') || ''; } catch(e){}
+  try { var sd = localStorage.getItem('lc_deleted'); if(sd) deletedIds = JSON.parse(sd); } catch(e){}
   try { var s = localStorage.getItem('lc_dades'); if(s) dades = JSON.parse(s); } catch(e){}
-  if (!dades.cats) dades.cats = ['Fruita i verdura','LÃ ctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'];
+  if (!dades.cats) dades.cats = ['Fruita i verdura','Làctics','Carn i peix','Pa i cereals','Conserves','Neteja','Higiene','Begudes','Congelats','Altres'];
   if (!dades.habituals) dades.habituals = [];
   renderAll();
   if (token) syncDropbox();
-  else setStatus('warning', 'Sense token de Dropbox â€” dades locals');
+  else setStatus('warning', 'Sense token de Dropbox — dades locals');
 })();
 
-// â”€â”€ DROPBOX SYNC â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── DROPBOX SYNC ───────────────────────────────────────────────────────────
 function setStatus(state, msg) {
   var dot = document.getElementById('status-dot');
   var txt = document.getElementById('status-text');
@@ -341,13 +343,13 @@ async function refreshAccessToken() {
 }
 
 async function syncDropbox() {
-  if (!token && !refreshToken) { setStatus('', 'Sense token â€” configura\'l a Ajustos'); return; }
-  if (!clientId || !clientSecret) { setStatus('error', 'Falta App Key o App Secret â€” configura\'ls a Ajustos'); return; }
+  if (!token && !refreshToken) { setStatus('', 'Sense token — configura\'l a Ajustos'); return; }
+  if (!clientId || !clientSecret) { setStatus('error', 'Falta App Key o App Secret — configura\'ls a Ajustos'); return; }
   if (syncing) return;
   syncing = true;
   setStatus('loading', 'Sincronitzant...');
   try {
-    // Si no hi ha token d'accÃ©s, renovar primer
+    // Si no hi ha token d'accés, renovar primer
     if (!token && refreshToken) {
       await refreshAccessToken();
     }
@@ -384,21 +386,33 @@ async function syncDropbox() {
     var now = new Date();
     setStatus('ok', 'Sincronitzat a les ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0'));
   } catch(e) {
-    setStatus('error', 'Error de sincronitzaciÃ³');
+    setStatus('error', 'Error de sincronització');
     console.error(e);
   }
   syncing = false;
 }
 
 function mergeData(remote) {
-  // Articles: els del servidor tenen prioritat, afegim els locals nous
+  // Fusionar deletedIds: combinar els esborrats locals i remots
+  var remoteDel = remote.deletedIds || [];
+  deletedIds = deletedIds.concat(remoteDel.filter(function(id){ return deletedIds.indexOf(id) < 0; }));
+
+  // Articles: combinar remots i locals, però excloure els que s'han esborrat
   var remoteIds = (remote.articles||[]).map(function(a){return a.id;});
-  var localNous = dades.articles.filter(function(a){ return remoteIds.indexOf(a.id)<0; });
-  dades.articles = (remote.articles||[]).concat(localNous);
+  var localNous = dades.articles.filter(function(a){
+    return remoteIds.indexOf(a.id) < 0 && deletedIds.indexOf(a.id) < 0;
+  });
+  // Dels articles remots, excloure els que hem esborrat localment
+  var remoteValids = (remote.articles||[]).filter(function(a){
+    return deletedIds.indexOf(a.id) < 0;
+  });
+  dades.articles = remoteValids.concat(localNous);
+
   // Habituals: merge per id
   var remoteHIds = (remote.habituals||[]).map(function(a){return a.id;});
   var localHNous = dades.habituals.filter(function(a){ return remoteHIds.indexOf(a.id)<0; });
   dades.habituals = (remote.habituals||[]).concat(localHNous);
+
   // Categories
   if (remote.cats && remote.cats.length) dades.cats = remote.cats;
   saveLocal();
@@ -413,7 +427,7 @@ async function uploadDropbox() {
       'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE, mode: 'overwrite', autorename: false }),
       'Content-Type': 'application/octet-stream'
     },
-    body: JSON.stringify(dades)
+    body: JSON.stringify(Object.assign({}, dades, {deletedIds: deletedIds}))
   });
   if (resp.status === 401) {
     var renewed = await refreshAccessToken();
@@ -425,14 +439,17 @@ async function uploadDropbox() {
           'Dropbox-API-Arg': JSON.stringify({ path: DROPBOX_FILE, mode: 'overwrite', autorename: false }),
           'Content-Type': 'application/octet-stream'
         },
-        body: JSON.stringify(dades)
+        body: JSON.stringify(Object.assign({}, dades, {deletedIds: deletedIds}))
       });
     }
   }
 }
 
 function saveLocal() {
-  try { localStorage.setItem('lc_dades', JSON.stringify(dades)); } catch(e){}
+  try {
+    localStorage.setItem('lc_dades', JSON.stringify(dades));
+    localStorage.setItem('lc_deleted', JSON.stringify(deletedIds));
+  } catch(e){}
 }
 
 async function saveAndSync() {
@@ -447,7 +464,7 @@ async function saveAndSync() {
   }
 }
 
-// â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── RENDER ─────────────────────────────────────────────────────────────────
 function renderAll() {
   renderLlista();
   renderHabituals();
@@ -479,7 +496,7 @@ function renderLlista() {
 
   var html = '';
   if (!pendents.length && !agafatsList.length) {
-    html = '<div class="empty"><i class="ti ti-basket"></i>La llista Ã©s buida!<br><span style="font-size:12px;margin-top:6px;display:block">Prem + per afegir articles</span></div>';
+    html = '<div class="empty"><i class="ti ti-basket"></i>La llista és buida!<br><span style="font-size:12px;margin-top:6px;display:block">Prem + per afegir articles</span></div>';
   }
   if (pendents.length) {
     html += pendents.map(function(a){ return artCard(a); }).join('');
@@ -495,7 +512,7 @@ function artCard(a) {
   return '<div class="article-card' + (a.agafat?' agafat':'') + '" onclick="toggleAgafat(\'' + a.id + '\')">'
     + '<div class="check-circle' + (a.agafat?' checked':'') + '">' + (a.agafat?'<i class="ti ti-check"></i>':'') + '</div>'
     + '<div class="article-info"><div class="article-nom">' + esc(a.nom) + '</div>'
-    + (a.qty||a.cat?'<div class="article-meta">' + (a.cat||'') + (a.qty&&a.cat?' Â· ':'') + (a.qty||'') + '</div>':'')
+    + (a.qty||a.cat?'<div class="article-meta">' + (a.cat||'') + (a.qty&&a.cat?' · ':'') + (a.qty||'') + '</div>':'')
     + '</div>'
     + '<button class="del-btn" onclick="event.stopPropagation();openEditArt(\'' + a.id + '\')"><i class="ti ti-pencil"></i></button>'
     + '</div>';
@@ -515,7 +532,7 @@ function renderHabituals() {
   document.getElementById('habituals-container').innerHTML = list.length ? list.map(function(h){
     var aLlista = llista_ids.indexOf(h.nom.toLowerCase()) > -1;
     return '<div class="hab-card' + (aLlista?' a-llista':'') + '" onclick="addHabToLlista(\'' + h.id + '\')">'
-      + '<div style="flex:1"><div class="hab-nom">' + esc(h.nom) + '</div><div class="hab-cat">' + esc(h.cat||'') + (h.qty?' Â· '+esc(h.qty):'') + '</div></div>'
+      + '<div style="flex:1"><div class="hab-nom">' + esc(h.nom) + '</div><div class="hab-cat">' + esc(h.cat||'') + (h.qty?' · '+esc(h.qty):'') + '</div></div>'
       + '<button onclick="event.stopPropagation();openEditHab(\'' + h.id + '\')" style="border:none;background:transparent;color:var(--gray-400);cursor:pointer;font-size:16px"><i class="ti ti-pencil"></i></button>'
       + '</div>';
   }).join('')
@@ -529,11 +546,11 @@ function renderAjustos() {
   if (ci) ci.value = clientId;
   var cs = document.getElementById('client-secret-input');
   if (cs) cs.value = clientSecret;
-  // Mostrar estat de configuraciÃ³
+  // Mostrar estat de configuració
   var st = document.getElementById('config-status');
   if (st) {
     if (clientId && clientSecret && refreshToken) {
-      st.innerHTML = '<span style="color:var(--green)">&#x2705; ConfiguraciÃ³ completa</span>';
+      st.innerHTML = '<span style="color:var(--green)">&#x2705; Configuració completa</span>';
     } else {
       var missing = [];
       if (!clientId) missing.push('App Key');
@@ -556,7 +573,7 @@ function renderCatsEdit() {
   }).join('');
 }
 
-// â”€â”€ ACCIONS ARTICLES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── ACCIONS ARTICLES ───────────────────────────────────────────────────────
 function toggleAgafat(id) {
   var a = dades.articles.find(function(x){return x.id===id;});
   if (a) { a.agafat = !a.agafat; saveAndSync(); renderLlista(); }
@@ -600,6 +617,7 @@ function saveArticle() {
 
 function deleteArticle() {
   if (!editArtId || !confirm('Eliminar aquest article?')) return;
+  if (deletedIds.indexOf(editArtId) < 0) deletedIds.push(editArtId);
   dades.articles = dades.articles.filter(function(x){return x.id!==editArtId;});
   saveAndSync(); closeModal('modal-article'); renderLlista();
 }
@@ -607,17 +625,21 @@ function deleteArticle() {
 function clearAgafats() {
   if (!dades.articles.some(function(a){return a.agafat;})) { alert('No hi ha articles marcats com a agafats.'); return; }
   if (confirm('Eliminar tots els articles ja agafats?')) {
+    // Guardar els IDs dels articles que s'esborraran per evitar que tornin
+    dades.articles.filter(function(a){return a.agafat;}).forEach(function(a){
+      if (deletedIds.indexOf(a.id) < 0) deletedIds.push(a.id);
+    });
     dades.articles = dades.articles.filter(function(a){return !a.agafat;});
     saveAndSync(); renderLlista();
   }
 }
 
-// â”€â”€ HABITUALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── HABITUALS ──────────────────────────────────────────────────────────────
 function addHabToLlista(id) {
   var h = dades.habituals.find(function(x){return x.id===id;});
   if (!h) return;
   var jaExisteix = dades.articles.some(function(a){return a.nom.toLowerCase()===h.nom.toLowerCase()&&!a.agafat;});
-  if (jaExisteix) { alert('"' + h.nom + '" ja Ã©s a la llista!'); return; }
+  if (jaExisteix) { alert('"' + h.nom + '" ja és a la llista!'); return; }
   dades.articles.push({ id: String(Date.now()), nom: h.nom, qty: h.qty||'', cat: h.cat, agafat: false });
   saveAndSync(); renderHabituals(); renderLlista();
 }
@@ -662,7 +684,7 @@ function deleteHabitual() {
   saveAndSync(); closeModal('modal-hab'); renderHabituals();
 }
 
-// â”€â”€ CATEGORIES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── CATEGORIES ─────────────────────────────────────────────────────────────
 function openCatModal() { renderCatsEdit(); openOverlay('modal-cats'); }
 function addCat() {
   var v = document.getElementById('new-cat-input').value.trim();
@@ -679,7 +701,7 @@ function deleteCat(i) {
   dades.cats.splice(i,1); saveLocal(); renderCatsEdit(); renderAjustos();
 }
 
-// â”€â”€ TOKEN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── TOKEN ──────────────────────────────────────────────────────────────────
 function saveToken() {
   var newClientId = document.getElementById('client-id-input').value.trim();
   var newClientSecret = document.getElementById('client-secret-input').value.trim();
@@ -703,11 +725,11 @@ function saveToken() {
   } catch(e){}
 
   renderAjustos();
-  alert('ConfiguraciÃ³ guardada! Sincronitzant...');
+  alert('Configuració guardada! Sincronitzant...');
   syncDropbox();
 }
 
-// â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── UTILS ──────────────────────────────────────────────────────────────────
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 function setFilter(f) { filterCat=f; renderLlista(); }
 function setHabFilter(f) { habFilterCat=f; renderHabituals(); }
@@ -727,13 +749,13 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 function bgClick(e, id) { if (e.target===document.getElementById(id)) closeModal(id); }
 
 function clearAll() {
-  if (confirm('Esborrar totes les dades locals? (Dropbox no es veurÃ  afectat)')) {
+  if (confirm('Esborrar totes les dades locals? (Dropbox no es veurà afectat)')) {
     dades = { articles:[], habituals:[], cats: dades.cats };
     saveLocal(); renderAll();
   }
 }
 
-// Sincronitzar cada 30 segons si la pÃ gina Ã©s visible
+// Sincronitzar cada 30 segons si la pàgina és visible
 setInterval(function(){ if (!document.hidden && token) syncDropbox(); }, 30000);
 document.addEventListener('visibilitychange', function(){ if (!document.hidden && token) syncDropbox(); });
 </script>
